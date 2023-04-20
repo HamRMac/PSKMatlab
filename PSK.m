@@ -83,7 +83,7 @@ error_4PSK_sym = erfc(sqrt(Eb_N0));
 % 8PSK error
 error_8PSK_sym = 2.*Q(sqrt(2.*Eb_N0.*log2(8)).*sin(pi/8));
 error_8PSK_bit = error_8PSK_sym/log2(8);
-
+% plotting somethign
 figure
 hold on
 loglog(Eb_N0,error_2PSK_bit,'r-')
