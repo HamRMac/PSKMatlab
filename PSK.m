@@ -21,7 +21,7 @@ reshaped_bits = @(bits, M) reshape(bits, [], log2(M));
 bits_to_symbols = @(bits, M) bi2de(reshaped_bits(bits,M), 'left-msb')';
 
 % Anon function to create M-PSK waveform
-psk_waveform = @(symbol, M, fc, Eb, T, Ts) sqrt(2 * Eb / T) * cos(2 * pi * fc * (0:Ts:T-Ts) + 2 * pi * symbol / M);
+psk_waveform = @(symbol, M, fc, Es, T, Ts) sqrt(2 * Es / T) * cos(2 * pi * fc * (0:Ts:T-Ts) - 2 * pi * symbol / M);
 
 % Assign up to 10 colours for plotting
 colors = {'r', 'g', 'b', 'm', 'c', 'y', 'k', 'r--', 'g--', 'b--'};
