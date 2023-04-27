@@ -1,3 +1,6 @@
+%% Reset Sim
+close all; % Close current figures.
+
 %% Define Parameters
 M_values = [2, 4, 8];
 fc = 100e3;
@@ -28,6 +31,7 @@ psk_waveform = @(symbol, M, fc, Es, T, Ts) sqrt(2 * Es / T) * cos(2 * pi * fc * 
 colors = {'r', 'g', 'b', 'm', 'c', 'y', 'k', 'r--', 'g--', 'b--'};
 
 % Add loop counter to index Es
+figI = 1;
 loops = 0;
 for M = M_values
     loops = loops + 1;
@@ -48,7 +52,8 @@ for M = M_values
     end
 
     % Plot the waveform
-    figure;
+    figure(figI);
+    figI = figI + 1;
     hold on;
     time_vector = (0:Ts:(T * 10) - Ts);
     for i = 1:length(waveform_segments)
@@ -64,35 +69,60 @@ end
 
 %% Calculate error probabilities
 % Define error functions
-syms erfc_probFunc(t) erfc(x) Q(x)
-erfc_probFunc(t) = exp(-t.^2);
-erfc(x) = 2/sqrt(pi)*int(erfc_probFunc,x,Inf);
-Q(x) = (1/2)*erfc(x/sqrt(2));
+f = @(t) exp(-1*t.^2);
+E_b = 1;
+E_s = @(M) E_b*log2(M);
+erfc = @(x) 2/sqrt(pi) * integral(f,x,Inf);
+Q = @(x) 1/2*erfc(x/sqrt(2));
 
-% Define Parameters
-Eb_N0 = 10.^((0:10)/10);
+% E_b/N_0 between 0 and 10 dB
+E_b_N_0_dB = 0:10;
+E_b_N_0 = 10.^(E_b_N_0_dB/10);
 
-% 2PSK error
-error_2PSK_bit = Q(sqrt(2.*Eb_N0));
-error_2PSK_sym = error_2PSK_bit;
+% -- 2-PSK --
+P_b2 = zeros(1, length(E_b_N_0));
+for dB = 1:11
+    x = sqrt(2*E_b_N_0(dB));
+    P_b2(dB) = Q(sqrt(2*E_b_N_0(dB)));
+end
 
-% 4PSK error
-error_4PSK_bit = Q(sqrt(2.*Eb_N0));
-error_4PSK_sym = erfc(sqrt(Eb_N0));
+P_s2 = P_b2;
 
-% 8PSK error
-error_8PSK_sym = 2.*Q(sqrt(2.*Eb_N0.*log2(8)).*sin(pi/8));
-error_8PSK_bit = error_8PSK_sym/log2(8);
-% plotting somethign
-figure
-hold on
-loglog(Eb_N0,error_2PSK_bit,'r-')
-loglog(Eb_N0,error_2PSK_sym,'r--')
-loglog(Eb_N0,error_4PSK_bit,'g-')
-loglog(Eb_N0,error_4PSK_sym,'g--')
-loglog(Eb_N0,error_8PSK_bit,'b-')
-loglog(Eb_N0,error_8PSK_sym,'b--')
-title('Plot of M-PSK error probabilities for bits and symbols');
-xlabel('Eb/N0 (SNR)');
-ylabel('Probability of errors');
-grid on;
+% -- 4-PSK --
+P_b4 = P_b2;
+P_s4 = zeros(1, length(E_b_N_0));
+for dB = 1:11
+    P_s4(dB) = erfc(sqrt(E_b_N_0(dB)));
+    
+end
+
+% -- 8-PSK --
+
+P_s8 = zeros(1, length(E_b_N_0));
+P_b8 = zeros(1, length(E_b_N_0)); 
+
+for dB = 1:11
+    P_s8(dB) = 2 * Q(sqrt(2*E_b_N_0(dB)*log2(8))*sin(pi/8));
+    P_b8(dB) = P_s8(dB)/log2(8);
+end
+
+% -- All error plots --
+figure(4);
+
+plot(E_b_N_0_dB, P_s2,'o-.');
+hold on;
+plot(E_b_N_0_dB, P_b2,'+--');
+hold on;
+plot(E_b_N_0_dB, P_s4);
+hold on;
+plot(E_b_N_0_dB, P_b4,'*:');
+hold on;
+plot(E_b_N_0_dB, P_s8);
+hold on;
+plot(E_b_N_0_dB, P_b8);
+
+set(gca, 'YScale', 'log')
+xlabel('E_{b}/N_{0} (dB)')
+ylabel('Error probability')
+title('Probabilty of error for M-PSK')
+legend('2-PSK P_{s}', '2-PSK P_{b}','4-PSK P_{s}', '4-PSK P_{b}','8-PSK P_{s}', '8-PSK P_{b}')
