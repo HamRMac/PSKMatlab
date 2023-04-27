@@ -14,7 +14,8 @@ Q = @(x) 1/2*erfc(x/sqrt(2));
 
 % E_b/N_0 between 0 and 10 dB
 E_b_N_0_dB = 0:10;
-E_b_N_0 = db2mag(E_b_N_0_dB);
+%E_b_N_0 = db2mag(E_b_N_0_dB);
+E_b_N_0 = 10.^(E_b_N_0_dB/10);
 
 %% Generate frame of 1024 rand bits
 n = 1024;
