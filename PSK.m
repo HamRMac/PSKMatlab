@@ -10,6 +10,8 @@ T = 0.1e-3;
 fs = 10 * fc;
 Ts = 1 / fs;
 
+WGN_SNR = 0;
+
 %% Simulate PSK signals using randomly generated bits
 % Number of bits
 n = 1024;
@@ -21,7 +23,7 @@ bits = randi([0, 1], 1, n);
 % This works by reordering the bits into 2xlog2(M) bit segments and then
 % converting it to decimal representations using the reshape and bi2de
 % functions respectively.
-reshaped_bits = @(bits, M) reshape(bits, [], log2(M));
+reshaped_bits = @(bits, M) reshape(bits, log2(M),[]).';
 bits_to_symbols = @(bits, M) bi2de(reshaped_bits(bits,M), 'left-msb')';
 
 % Anon function to create M-PSK waveform
@@ -46,14 +48,18 @@ for M = M_values
     symbols = bits_to_symbols(bits_padded, M);
 
     % Create the M-PSK waveform
+
     waveform_segments = {};
+    noisyWaveformSegments = {};
     for symbol = symbols(1:10)
         waveform_segments{end + 1} = psk_waveform(symbol, M, fc, Es(loops), T, Ts);
+        noisyWaveformSegments{end + 1} = awgn(waveform_segments{end}, WGN_SNR);
     end
 
-    % Plot the waveform
-    figure(figI);
-    figI = figI + 1;
+    % Plot the Normal waveform
+    figure(1);
+    subplot(1,3,figI)
+    %figI = figI + 1;
     hold on;
     time_vector = (0:Ts:(T * 10) - Ts);
     for i = 1:length(waveform_segments)
@@ -62,6 +68,22 @@ for M = M_values
     end
     hold off;
     title([num2str(M), '-PSK Waveform']);
+    xlabel('Time (s)');
+    ylabel('Amplitude');
+    grid on;
+
+    % Plot the Normal waveform
+    figure(2);
+    subplot(1,3,figI)
+    figI = figI + 1;
+    hold on;
+    time_vector = (0:Ts:(T * 10) - Ts);
+    for i = 1:length(noisyWaveformSegments)
+        start_time = (i - 1) * T;
+        plot(start_time + (0:Ts:T-Ts), noisyWaveformSegments{i}, colors{symbols(i) + 1});
+    end
+    hold off;
+    title([num2str(M), '-PSK Waveform with WGN at a SNR of ',num2str(WGN_SNR),'dB']);
     xlabel('Time (s)');
     ylabel('Amplitude');
     grid on;
@@ -107,7 +129,7 @@ for dB = 1:11
 end
 
 % -- All error plots --
-figure(4);
+figure(3);
 
 plot(E_b_N_0_dB, P_s2,'o-.');
 hold on;
@@ -126,3 +148,5 @@ xlabel('E_{b}/N_{0} (dB)')
 ylabel('Error probability')
 title('Probabilty of error for M-PSK')
 legend('2-PSK P_{s}', '2-PSK P_{b}','4-PSK P_{s}', '4-PSK P_{b}','8-PSK P_{s}', '8-PSK P_{b}')
+
+%% Calculate Spectral efficencies
