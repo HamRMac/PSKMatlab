@@ -48,7 +48,6 @@ for M = M_values
     symbols = bits_to_symbols(bits_padded, M);
 
     % Create the M-PSK waveform
-
     waveform_segments = {};
     noisyWaveformSegments = {};
     for symbol = symbols(1:10)
@@ -59,7 +58,6 @@ for M = M_values
     % Plot the Normal waveform
     figure(1);
     subplot(1,3,figI)
-    %figI = figI + 1;
     hold on;
     time_vector = (0:Ts:(T * 10) - Ts);
     for i = 1:length(waveform_segments)
@@ -72,7 +70,7 @@ for M = M_values
     ylabel('Amplitude');
     grid on;
 
-    % Plot the Normal waveform
+    % Plot the Noisy waveform
     figure(2);
     subplot(1,3,figI)
     figI = figI + 1;
@@ -119,7 +117,6 @@ for dB = 1:11
 end
 
 % -- 8-PSK --
-
 P_s8 = zeros(1, length(E_b_N_0));
 P_b8 = zeros(1, length(E_b_N_0)); 
 
@@ -130,7 +127,6 @@ end
 
 % -- All error plots --
 figure(3);
-
 plot(E_b_N_0_dB, P_s2,'o-.');
 hold on;
 plot(E_b_N_0_dB, P_b2,'+--');
