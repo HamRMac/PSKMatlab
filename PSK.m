@@ -125,7 +125,7 @@ for dB = 1:11
     P_b8(dB) = P_s8(dB)/log2(8);
 end
 
-% -- All error plots --
+% -- Plot all error plots --
 figure(3);
 plot(E_b_N_0_dB, P_s2,'o-.');
 hold on;
@@ -139,10 +139,9 @@ plot(E_b_N_0_dB, P_s8);
 hold on;
 plot(E_b_N_0_dB, P_b8);
 
+% Bit of formatting
 set(gca, 'YScale', 'log')
 xlabel('E_{b}/N_{0} (dB)')
 ylabel('Error probability')
 title('Probabilty of error for M-PSK')
 legend('2-PSK P_{s}', '2-PSK P_{b}','4-PSK P_{s}', '4-PSK P_{b}','8-PSK P_{s}', '8-PSK P_{b}')
-
-%% Calculate Spectral efficencies
